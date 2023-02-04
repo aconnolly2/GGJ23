@@ -29,6 +29,14 @@ public class PlayerInput : MonoBehaviour
 
     void Interact()
     {
-        Debug.Log("Interaction attempted");
+        RaycastHit hit;
+        if (Physics.Raycast(transform.position, Vector3.down, out hit))
+        {
+            Debug.Log(hit.transform.tag);
+            if (hit.transform.tag == "planter")
+            {
+                hit.transform.GetComponent<Planter>().PlantPotato();
+            }
+        }
     }
 }

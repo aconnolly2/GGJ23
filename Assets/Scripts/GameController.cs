@@ -4,8 +4,10 @@ using UnityEngine;
 
 public class GameController : MonoBehaviour
 {
-
     GUIManager GUIM;
+
+    GameObject PlanterParent;
+    List<Planter> planters = new List<Planter>();
 
     private int potatoCount = 30;
 
@@ -24,6 +26,18 @@ public class GameController : MonoBehaviour
         GUIM = GetComponent<GUIManager>();
         GUIM.UpdatePotatoCount(potatoCount);
         GUIM.UpdateSeason(currentSeason, currentYear);
+
+        // Populate Planter List
+        PlanterParent = GameObject.Find("Planters");
+        foreach(Transform p in PlanterParent.transform)
+        {
+            if (p.tag == "planter")
+            {
+                Planter planter = p.GetComponent<Planter>();
+                planter.Init(this);
+                planters.Add(planter);
+            }
+        }
     }
 
     // Update is called once per frame
@@ -41,7 +55,22 @@ public class GameController : MonoBehaviour
             eatPotato();
             seasonTime = 0;
         }
-        
+
+    }
+    public bool PlantPotato()
+    {
+        if (potatoCount >= 0 && currentSeason >= 3 && currentSeason <= 5)
+        {
+            potatoCount -= 1;
+            GUIM.UpdatePotatoCount(potatoCount);
+            return true;
+        }
+        return false;
+    }
+
+    public int GetSeason()
+    {
+        return currentSeason;
     }
 
     void eatPotato()
@@ -62,5 +91,9 @@ public class GameController : MonoBehaviour
             currentYear += 1;
         }
         GUIM.UpdateSeason(currentSeason, currentYear);
+        foreach(Planter p in planters)
+        {
+            p.UpdateSeason(currentSeason);
+        }
     }
 }
