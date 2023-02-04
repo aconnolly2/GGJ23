@@ -25,6 +25,7 @@ public class Planter : MonoBehaviour
         Transform t = transform.Find("Potatoes");
         foreach (Transform p in t)
         {
+            p.rotation = Quaternion.Euler(new Vector3(0, Random.Range(0f, 180f), 0));
             inactivePotatoMeshes.Add(p.gameObject);
         }
         findNeighbors();
@@ -48,7 +49,7 @@ public class Planter : MonoBehaviour
             {
                 pS = planterState.seedling;
                 plantedSeason = gCon.GetSeason();
-                transform.Find("Seedling").gameObject.SetActive(true);
+                transform.Find("Seedlings").gameObject.SetActive(true);
             }
         }
     }
@@ -58,7 +59,7 @@ public class Planter : MonoBehaviour
         pS = planterState.empty;
         gCon.CollectPotatoes(potatoYield);
         potatoYield = 0;
-        transform.Find("Seedling").gameObject.SetActive(false);
+        transform.Find("Seedlings").gameObject.SetActive(false);
         transform.Find("PotatoPlant").gameObject.SetActive(false);
         clearPotatoes();
     }
@@ -71,7 +72,7 @@ public class Planter : MonoBehaviour
         pS = planterState.empty;
         potatoYield = 0;
         hasBlight = false;
-        transform.Find("Seedling").gameObject.SetActive(false);
+        transform.Find("Seedlings").gameObject.SetActive(false);
         transform.Find("PotatoPlant").gameObject.SetActive(false);
         meshRenderer.material = planterMat;
         clearPotatoes();
@@ -182,7 +183,7 @@ public class Planter : MonoBehaviour
     void growPlant()
     {
         pS = planterState.producing;
-        transform.Find("Seedling").gameObject.SetActive(false);
+        transform.Find("Seedlings").gameObject.SetActive(false);
         transform.Find("PotatoPlant").gameObject.SetActive(true);
     }
 

@@ -19,7 +19,8 @@ public class GameController : MonoBehaviour
     GameObject PlanterParent;
     List<Planter> planters = new List<Planter>();
 
-    private int potatoCount = 30;
+    private Queue<Potato> potatoQ = new Queue<Potato>();
+    private int potatoLifespan = 9;
     private int cash = 0;
     private int cashGoal = 300;
 
@@ -36,7 +37,7 @@ public class GameController : MonoBehaviour
     void Start()
     {
         GUIM = GetComponent<GUIManager>();
-        GUIM.UpdatePotatoCount(potatoCount);
+        GUIM.UpdatePotatoCount(potatoQ.Count);
         GUIM.UpdateSeason(currentSeason, currentYear);
         GUIM.UpdateCash(cash, cashGoal);
 
@@ -73,17 +74,16 @@ public class GameController : MonoBehaviour
         if (seasonTime >= seasonSpeed)
         {
             advanceSeason();
-            eatPotato();
             seasonTime = 0;
         }
 
     }
     public bool PlantPotato()
     {
-        if (potatoCount > 0 && currentSeason >= 3 && currentSeason <= 5)
+        if (potatoQ.Count > 0 && currentSeason >= 3 && currentSeason <= 5)
         {
-            potatoCount -= 1;
-            GUIM.UpdatePotatoCount(potatoCount);
+            RemovePotatoes(1);
+            GUIM.UpdatePotatoCount(potatoQ.Count);
             return true;
         }
         return false;
@@ -103,15 +103,31 @@ public class GameController : MonoBehaviour
 
     public void RestartGame()
     {
-        potatoCount = 30;
         cash = 0;
         currentSeason = 3;
         currentYear = 0;
+        AddPotatoes(30);
         GUIM.ClearEndText();
-        GUIM.UpdatePotatoCount(potatoCount);
+        GUIM.UpdatePotatoCount(potatoQ.Count);
         GUIM.UpdateSeason(currentSeason, currentYear);
         GUIM.UpdateCash(cash, cashGoal);
         currentGameState = GameState.Playing;
+    }
+
+    void AddPotatoes(int count)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            potatoQ.Enqueue(new Potato((currentYear * 12) + currentSeason));
+        }
+    }
+
+    void RemovePotatoes(int count)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            potatoQ.Dequeue();
+        }
     }
 
     public GameState GetCurrentGameState()
@@ -121,20 +137,20 @@ public class GameController : MonoBehaviour
 
     public void CollectPotatoes(int count)
     {
-        potatoCount += count;
-        GUIM.UpdatePotatoCount(potatoCount);
+        AddPotatoes(count);
+        GUIM.UpdatePotatoCount(potatoQ.Count);
     }
 
     public void SellPotatoes()
     {
         // 5 potatoes for 20 cash
-        if (potatoCount >= 5)
+        if (potatoQ.Count >= 5)
         {
-            potatoCount -= 5;
+            RemovePotatoes(5);
             cash += 20;
         }
 
-        GUIM.UpdatePotatoCount(potatoCount);
+        GUIM.UpdatePotatoCount(potatoQ.Count);
         GUIM.UpdateCash(cash, cashGoal);
 
         if (cash >= cashGoal)
@@ -161,13 +177,13 @@ public class GameController : MonoBehaviour
 
     void eatPotato()
     {
-        if (potatoCount <= 0)
+        if (potatoQ.Count <= 0)
         {
             Lose();
             return;
         }
-        potatoCount -= 1; // * playerCount
-        GUIM.UpdatePotatoCount(potatoCount);
+        RemovePotatoes(1); // * playerCount
+        GUIM.UpdatePotatoCount(potatoQ.Count);
     }
 
     void advanceSeason()
@@ -186,5 +202,14 @@ public class GameController : MonoBehaviour
         {
             p.UpdateSeason(currentSeason);
         }
+        eatPotato();
+
+        // Debug.Log(potatoQ.Peek().PlantedSeason.ToString() + " " + ((currentYear * 12 + currentSeason) - potatoLifespan).ToString());
+        // Expire Potatoes
+        while(potatoQ.Count > 0 && potatoQ.Peek().PlantedSeason <= (currentYear * 12 + currentSeason) - potatoLifespan)
+        {
+            potatoQ.Dequeue();
+        }
+        GUIM.UpdatePotatoCount(potatoQ.Count);
     }
 }
