@@ -66,6 +66,8 @@ public class Planter : MonoBehaviour
     public void BurnField()
     {
         // Play Fire Particle Effect
+        transform.Find("BlightParticle").GetComponent<ParticleSystem>().Stop();
+        transform.Find("FlameParticle").GetComponent<ParticleSystem>().Play();
         pS = planterState.empty;
         potatoYield = 0;
         hasBlight = false;
@@ -149,6 +151,7 @@ public class Planter : MonoBehaviour
     {
         hasBlight = true;
         meshRenderer.material = blightMat;
+        transform.Find("BlightParticle").GetComponent<ParticleSystem>().Play();
     }
 
     void findNeighbors()
@@ -195,7 +198,7 @@ public class Planter : MonoBehaviour
             activatePotato();
             activatePotato();
         }
-        else if (potatoIndex > 30)
+        else if (potatoIndex > 35)
         {
             potatoYield += 1;
             activatePotato();
