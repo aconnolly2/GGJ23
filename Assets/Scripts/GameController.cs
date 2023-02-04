@@ -12,33 +12,40 @@ public enum GameState
 
 public class GameController : MonoBehaviour
 {
+    GameState currentGameState = GameState.Menu; 
+    
     GUIManager GUIM;
-
-    GameState currentGameState = GameState.Menu;
 
     GameObject PlanterParent;
     List<Planter> planters = new List<Planter>();
-
     private Queue<Potato> potatoQ = new Queue<Potato>();
+
     private int potatoLifespan = 9;
     private int cash = 0;
     private int cashGoal = 300;
 
+    const int TOTAL_SEASONS = 12;
+    // 10 seconds to advance a season.
+    private float seasonSpeed = 10f;
+    private float seasonTimer = 0;
     private int currentSeason = 3;
     private int currentYear = 0;
+    public int GetSeason()
+    {
+        return currentSeason;
+    }
+    public int GetYear()
+    {
+        return currentYear;
+    }
 
-    private int totalSeasons = 12;
 
-    // 15 seconds to advance a season.
-    private float seasonSpeed = 10f;
-
-    private float seasonTime = 0;
     // Start is called before the first frame update
     void Start()
     {
         GUIM = GetComponent<GUIManager>();
         GUIM.UpdatePotatoCount(potatoQ.Count);
-        GUIM.UpdateSeason(currentSeason, currentYear);
+        GUIM.UpdateYear(currentYear);
         GUIM.UpdateCash(cash, cashGoal);
 
         // Initialize player(s)
@@ -64,73 +71,7 @@ public class GameController : MonoBehaviour
     {
         if (currentGameState == GameState.Playing)
         {
-            UpdateSeason();
-        }
-    }
-
-    void UpdateSeason()
-    {
-        seasonTime += Time.deltaTime;
-        if (seasonTime >= seasonSpeed)
-        {
-            advanceSeason();
-            seasonTime = 0;
-        }
-
-    }
-    public bool PlantPotato()
-    {
-        if (potatoQ.Count > 0 && currentSeason >= 3 && currentSeason <= 5)
-        {
-            RemovePotatoes(1);
-            GUIM.UpdatePotatoCount(potatoQ.Count);
-            return true;
-        }
-        return false;
-    }
-
-    void Win()
-    {
-        currentGameState = GameState.Win;
-        GUIM.ShowWin();
-    }
-
-    void Lose()
-    {
-        currentGameState = GameState.Lose;
-        GUIM.ShowLose();
-    }
-
-    public void RestartGame()
-    {
-        cash = 0;
-        currentSeason = 3;
-        currentYear = 0;
-        AddPotatoes(30);
-        GUIM.ClearEndText();
-        GUIM.UpdatePotatoCount(potatoQ.Count);
-        GUIM.UpdateSeason(currentSeason, currentYear);
-        GUIM.UpdateCash(cash, cashGoal);
-        foreach(Planter p in planters)
-        {
-            p.Reset();
-        }
-        currentGameState = GameState.Playing;
-    }
-
-    void AddPotatoes(int count)
-    {
-        for (int i = 0; i < count; i++)
-        {
-            potatoQ.Enqueue(new Potato((currentYear * 12) + currentSeason));
-        }
-    }
-
-    void RemovePotatoes(int count)
-    {
-        for (int i = 0; i < count; i++)
-        {
-            potatoQ.Dequeue();
+            updateSeason();
         }
     }
 
@@ -168,15 +109,60 @@ public class GameController : MonoBehaviour
         toolName = char.ToUpper(toolName[0]) + toolName.Substring(1);
         GUIM.UpdateCurrentTool(toolName);
     }
-
-    public int GetSeason()
+    public bool PlantPotato()
     {
-        return currentSeason;
+        if (potatoQ.Count > 0 && currentSeason >= 3 && currentSeason <= 5)
+        {
+            RemovePotatoes(1);
+            GUIM.UpdatePotatoCount(potatoQ.Count);
+            return true;
+        }
+        return false;
+    }
+    public void RestartGame()
+    {
+        cash = 0;
+        currentSeason = 3;
+        currentYear = 0;
+        AddPotatoes(30);
+        GUIM.ClearEndText();
+        GUIM.UpdatePotatoCount(potatoQ.Count);
+        GUIM.UpdateCursorSprite(currentSeason, seasonTimer, seasonSpeed);
+        GUIM.UpdateYear(currentYear);
+        GUIM.UpdateCash(cash, cashGoal);
+        foreach (Planter p in planters)
+        {
+            p.Reset();
+        }
+        currentGameState = GameState.Playing;
     }
 
-    public int GetYear()
+    void Win()
     {
-        return currentYear;
+        currentGameState = GameState.Win;
+        GUIM.ShowWin();
+    }
+
+    void Lose()
+    {
+        currentGameState = GameState.Lose;
+        GUIM.ShowLose();
+    }
+
+    void AddPotatoes(int count)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            potatoQ.Enqueue(new Potato((currentYear * 12) + currentSeason));
+        }
+    }
+
+    void RemovePotatoes(int count)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            potatoQ.Dequeue();
+        }
     }
 
     void eatPotato()
@@ -190,9 +176,19 @@ public class GameController : MonoBehaviour
         GUIM.UpdatePotatoCount(potatoQ.Count);
     }
 
+    void updateSeason()
+    {
+        seasonTimer += Time.deltaTime;
+        if (seasonTimer >= seasonSpeed)
+        {
+            advanceSeason();
+            seasonTimer = 0;
+        }
+        GUIM.UpdateCursorSprite(currentSeason, seasonTimer, seasonSpeed);
+    }
     void advanceSeason()
     {
-        currentSeason = (currentSeason + 1) % totalSeasons;
+        currentSeason = (currentSeason + 1) % TOTAL_SEASONS;
         if (currentSeason == 0)
         {
             currentSeason = 12;
@@ -200,8 +196,8 @@ public class GameController : MonoBehaviour
         else if (currentSeason == 1)
         {
             currentYear += 1;
+            GUIM.UpdateYear(currentYear);
         }
-        GUIM.UpdateSeason(currentSeason, currentYear);
         foreach(Planter p in planters)
         {
             p.UpdateSeason(currentSeason);
