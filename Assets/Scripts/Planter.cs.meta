@@ -3,7 +3,9 @@ guid: 1754f9179cd6cb64ea316bb85bfa100f
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - planterMat: {fileID: 2100000, guid: 34fa874939082644a86e71cda359ea9a, type: 2}
+  - blightMat: {fileID: 2100000, guid: 3bfbc83c6b1c1cf43a3a19b3f97221d1, type: 2}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

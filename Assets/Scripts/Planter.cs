@@ -4,9 +4,15 @@ using UnityEngine;
 
 public class Planter : MonoBehaviour
 {
+    public Material planterMat;
+    public Material blightMat;
+    MeshRenderer meshRenderer;
+
     GameController gCon;
     List<GameObject> inactivePotatoMeshes = new List<GameObject>();
     List<GameObject> activePotatoMeshes = new List<GameObject>();
+
+    List<Planter> neighborPlots = new List<Planter>();
 
     int plantedSeason;
     int potatoYield = 0;
@@ -14,12 +20,14 @@ public class Planter : MonoBehaviour
     public void Init(GameController g)
     {
         gCon = g;
+        meshRenderer = GetComponent<MeshRenderer>();
         // Populate Potato Meshes
         Transform t = transform.Find("Potatoes");
         foreach (Transform p in t)
         {
             inactivePotatoMeshes.Add(p.gameObject);
         }
+        findNeighbors();
     }
 
     enum planterState
@@ -63,12 +71,48 @@ public class Planter : MonoBehaviour
         hasBlight = false;
         transform.Find("Seedling").gameObject.SetActive(false);
         transform.Find("PotatoPlant").gameObject.SetActive(false);
+        meshRenderer.material = planterMat;
         clearPotatoes();
     }
 
     public void UpdateSeason(int newSeason)
     {
+
         // Blight Check
+        if (pS != planterState.empty)
+        {
+            // Blight Spread Check
+            float blightRisk = -1f;
+            float blightThresh = Random.Range(0f, 1f);
+            // + 50% if neighbor has blight.
+            int blightedNeighbors = 0;
+            foreach (Planter neighbor in neighborPlots)
+            {
+                if (neighbor.BlightCheck() && neighbor.isPlanted())
+                {
+                    blightedNeighbors += 1;
+                }
+            }
+
+            if (blightedNeighbors > 0)
+            {
+                blightRisk = 0.5f;
+            }
+
+            if (blightThresh <= blightRisk)
+            {
+                blighted();
+            }
+
+            // Base blight risk = 0.5% * year + 1
+            blightRisk = 0.005f * (gCon.GetYear() + 1);
+            blightThresh = Random.Range(0f, 1f);
+
+            if (blightThresh <= blightRisk)
+            {
+                blighted();
+            }
+        }
 
         // Growth
         if (pS == planterState.seedling)
@@ -86,6 +130,51 @@ public class Planter : MonoBehaviour
             }
         }
     }    
+
+    public bool BlightCheck()
+    {
+        return hasBlight;
+    }
+
+    public bool isPlanted()
+    {
+        if (pS == planterState.empty)
+        {
+            return false;
+        }
+        return true;
+    }
+
+    void blighted()
+    {
+        hasBlight = true;
+        meshRenderer.material = blightMat;
+    }
+
+    void findNeighbors()
+    {
+        RaycastHit hit;
+        Physics.Raycast(transform.position + new Vector3(5, 1f, 0), Vector3.down, out hit);
+        if (hit.transform.tag == "planter")
+        {
+            neighborPlots.Add(hit.transform.GetComponent<Planter>());
+        }
+        Physics.Raycast(transform.position + new Vector3(-5, 1f, 0), Vector3.down, out hit);
+        if (hit.transform.tag == "planter")
+        {
+            neighborPlots.Add(hit.transform.GetComponent<Planter>());
+        }
+        Physics.Raycast(transform.position + new Vector3(0, 1f, 5), Vector3.down, out hit);
+        if (hit.transform.tag == "planter")
+        {
+            neighborPlots.Add(hit.transform.GetComponent<Planter>());
+        }
+        Physics.Raycast(transform.position + new Vector3(0, 1f, -5), Vector3.down, out hit);
+        if (hit.transform.tag == "planter")
+        {
+            neighborPlots.Add(hit.transform.GetComponent<Planter>());
+        }
+    }
 
     void growPlant()
     {
@@ -106,7 +195,7 @@ public class Planter : MonoBehaviour
             activatePotato();
             activatePotato();
         }
-        else if (potatoIndex > 50)
+        else if (potatoIndex > 30)
         {
             potatoYield += 1;
             activatePotato();

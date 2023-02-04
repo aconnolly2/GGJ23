@@ -21,7 +21,7 @@ public class GameController : MonoBehaviour
 
     private int potatoCount = 30;
     private int cash = 0;
-    private int cashGoal = 500;
+    private int cashGoal = 300;
 
     private int currentSeason = 3;
     private int currentYear = 0;
@@ -152,6 +152,11 @@ public class GameController : MonoBehaviour
     public int GetSeason()
     {
         return currentSeason;
+    }
+
+    public int GetYear()
+    {
+        return currentYear;
     }
 
     void eatPotato()

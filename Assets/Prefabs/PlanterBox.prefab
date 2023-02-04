@@ -1941,6 +1941,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1754f9179cd6cb64ea316bb85bfa100f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  planterMat: {fileID: 2100000, guid: 34fa874939082644a86e71cda359ea9a, type: 2}
+  blightMat: {fileID: 2100000, guid: 3bfbc83c6b1c1cf43a3a19b3f97221d1, type: 2}
 --- !u!1 &7590381762138223368
 GameObject:
   m_ObjectHideFlags: 0
