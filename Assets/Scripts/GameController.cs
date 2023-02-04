@@ -2,9 +2,19 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum GameState
+{
+    Menu,
+    Playing,
+    Win,
+    Lose
+}
+
 public class GameController : MonoBehaviour
 {
     GUIManager GUIM;
+
+    GameState currentGameState = GameState.Menu;
 
     GameObject PlanterParent;
     List<Planter> planters = new List<Planter>();
@@ -51,7 +61,10 @@ public class GameController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        UpdateSeason();
+        if (currentGameState == GameState.Playing)
+        {
+            UpdateSeason();
+        }
     }
 
     void UpdateSeason()
@@ -67,13 +80,43 @@ public class GameController : MonoBehaviour
     }
     public bool PlantPotato()
     {
-        if (potatoCount >= 0 && currentSeason >= 3 && currentSeason <= 5)
+        if (potatoCount > 0 && currentSeason >= 3 && currentSeason <= 5)
         {
             potatoCount -= 1;
             GUIM.UpdatePotatoCount(potatoCount);
             return true;
         }
         return false;
+    }
+
+    void Win()
+    {
+        currentGameState = GameState.Win;
+        GUIM.ShowWin();
+    }
+
+    void Lose()
+    {
+        currentGameState = GameState.Lose;
+        GUIM.ShowLose();
+    }
+
+    public void RestartGame()
+    {
+        potatoCount = 30;
+        cash = 0;
+        currentSeason = 3;
+        currentYear = 0;
+        GUIM.ClearEndText();
+        GUIM.UpdatePotatoCount(potatoCount);
+        GUIM.UpdateSeason(currentSeason, currentYear);
+        GUIM.UpdateCash(cash, cashGoal);
+        currentGameState = GameState.Playing;
+    }
+
+    public GameState GetCurrentGameState()
+    {
+        return currentGameState;
     }
 
     public void CollectPotatoes(int count)
@@ -96,7 +139,7 @@ public class GameController : MonoBehaviour
 
         if (cash >= cashGoal)
         {
-            // Win condition!
+            Win();
         }
     }
 
@@ -115,7 +158,8 @@ public class GameController : MonoBehaviour
     {
         if (potatoCount <= 0)
         {
-            // Game Over!
+            Lose();
+            return;
         }
         potatoCount -= 1; // * playerCount
         GUIM.UpdatePotatoCount(potatoCount);

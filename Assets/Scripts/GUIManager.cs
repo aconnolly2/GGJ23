@@ -11,6 +11,10 @@ public class GUIManager : MonoBehaviour
     public TextMeshProUGUI CurrentTool;
     public TextMeshProUGUI CashCounter;
 
+    public TextMeshProUGUI WinText;
+    public TextMeshProUGUI LoseText;
+    public TextMeshProUGUI StartGame;
+
     public void UpdatePotatoCount(int potatoCount)
     {
         PotatoCounter.text = "Potatoes: " + potatoCount.ToString();
@@ -29,5 +33,24 @@ public class GUIManager : MonoBehaviour
     public void UpdateCash(int cash, int cashGoal)
     {
         CashCounter.text = "$" + cash.ToString() + " / $" + cashGoal.ToString();
+    }
+
+    public void ShowWin()
+    {
+        WinText.gameObject.SetActive(true);
+        StartGame.gameObject.SetActive(true);
+    }
+
+    public void ShowLose()
+    {
+        LoseText.gameObject.SetActive(true);
+        StartGame.gameObject.SetActive(true);
+    }
+
+    public void ClearEndText()
+    {
+        WinText.gameObject.SetActive(false);
+        LoseText.gameObject.SetActive(false);
+        StartGame.gameObject.SetActive(false);
     }
 }

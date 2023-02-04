@@ -33,11 +33,14 @@ public class PlayerInput : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        direction.x = Input.GetAxis("Horizontal");
-        direction.z = Input.GetAxis("Vertical");
-        Vector3.Normalize(direction);
-        direction.y = -9f;
-        CC.Move(direction * speed * Time.deltaTime);
+        if (gCon.GetCurrentGameState() == GameState.Playing)
+        {
+            direction.x = Input.GetAxis("Horizontal");
+            direction.z = Input.GetAxis("Vertical");
+            Vector3.Normalize(direction);
+            direction.y = -9f;
+            CC.Move(direction * speed * Time.deltaTime);
+        }
         if (Input.GetButtonDown("Jump"))
         {
             Interact();
@@ -66,32 +69,40 @@ public class PlayerInput : MonoBehaviour
 
     void Interact()
     {
-        RaycastHit hit;
-        if (Physics.Raycast(transform.position, Vector3.down, out hit))
+        if (gCon.GetCurrentGameState() == GameState.Playing)
         {
-            if (hit.transform.tag == "planter")
+            RaycastHit hit;
+            if (Physics.Raycast(transform.position, Vector3.down, out hit))
             {
-                if (currentTool == tools.planter)
+                if (hit.transform.tag == "planter")
                 {
-                    hit.transform.GetComponent<Planter>().PlantPotato();
+                    if (currentTool == tools.planter)
+                    {
+                        hit.transform.GetComponent<Planter>().PlantPotato();
+                    }
+                    if (currentTool == tools.harvester)
+                    {
+                        hit.transform.GetComponent<Planter>().HarvestPotatoes();
+                    }
+                    if (currentTool == tools.flamethrower)
+                    {
+                        hit.transform.GetComponent<Planter>().BurnField();
+                    }
                 }
-                if (currentTool == tools.harvester)
+                else if (hit.transform.tag == "tool")
                 {
-                    hit.transform.GetComponent<Planter>().HarvestPotatoes();
+                    switchTool(hit.transform.name);
                 }
-                if (currentTool == tools.flamethrower)
+                else if (hit.transform.tag == "vendor")
                 {
-                    hit.transform.GetComponent<Planter>().BurnField();
+                    gCon.SellPotatoes();
                 }
+
             }
-            else if (hit.transform.tag == "tool")
-            {
-                switchTool(hit.transform.name);
-            }
-            else if (hit.transform.tag == "vendor")
-            {
-                gCon.SellPotatoes();
-            }
+        }
+        else
+        {
+            gCon.RestartGame();
         }
     }
 }
