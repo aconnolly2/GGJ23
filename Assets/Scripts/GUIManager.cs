@@ -8,6 +8,7 @@ public class GUIManager : MonoBehaviour
 
     public TextMeshProUGUI PotatoCounter;
     public TextMeshProUGUI SeasonCounter;
+    public TextMeshProUGUI CurrentTool;
 
     public void UpdatePotatoCount(int potatoCount)
     {
@@ -17,5 +18,10 @@ public class GUIManager : MonoBehaviour
     public void UpdateSeason(int season, int year)
     {
         SeasonCounter.text = "Year: " + year.ToString() + " Season: " + season.ToString();
+    }
+
+    public void UpdateCurrentTool(string toolName)
+    {
+        CurrentTool.text = "Current Tool: " + toolName;
     }
 }

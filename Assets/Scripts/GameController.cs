@@ -27,6 +27,11 @@ public class GameController : MonoBehaviour
         GUIM.UpdatePotatoCount(potatoCount);
         GUIM.UpdateSeason(currentSeason, currentYear);
 
+        // Initialize player(s)
+        PlayerInput PI = GameObject.Find("Player").GetComponent<PlayerInput>();
+        PI.Init(this);
+           
+
         // Populate Planter List
         PlanterParent = GameObject.Find("Planters");
         foreach(Transform p in PlanterParent.transform)
@@ -68,6 +73,18 @@ public class GameController : MonoBehaviour
         return false;
     }
 
+    public void CollectPotatoes(int count)
+    {
+        potatoCount += count;
+        GUIM.UpdatePotatoCount(potatoCount);
+    }
+
+    public void UpdateTool(string toolName)
+    {
+        toolName = char.ToUpper(toolName[0]) + toolName.Substring(1);
+        GUIM.UpdateCurrentTool(toolName);
+    }
+
     public int GetSeason()
     {
         return currentSeason;
@@ -85,7 +102,7 @@ public class GameController : MonoBehaviour
 
     void advanceSeason()
     {
-        currentSeason = currentSeason + 1 % totalSeasons;
+        currentSeason = (currentSeason + 1) % totalSeasons;
         if (currentSeason == 0)
         {
             currentYear += 1;

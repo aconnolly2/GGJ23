@@ -45,6 +45,27 @@ public class Planter : MonoBehaviour
         }
     }
 
+    public void HarvestPotatoes()
+    {
+        pS = planterState.empty;
+        gCon.CollectPotatoes(potatoYield);
+        potatoYield = 0;
+        transform.Find("Seedling").gameObject.SetActive(false);
+        transform.Find("PotatoPlant").gameObject.SetActive(false);
+        clearPotatoes();
+    }
+
+    public void BurnField()
+    {
+        // Play Fire Particle Effect
+        pS = planterState.empty;
+        potatoYield = 0;
+        hasBlight = false;
+        transform.Find("Seedling").gameObject.SetActive(false);
+        transform.Find("PotatoPlant").gameObject.SetActive(false);
+        clearPotatoes();
+    }
+
     public void UpdateSeason(int newSeason)
     {
         // Blight Check
