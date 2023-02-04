@@ -111,6 +111,10 @@ public class GameController : MonoBehaviour
         GUIM.UpdatePotatoCount(potatoQ.Count);
         GUIM.UpdateSeason(currentSeason, currentYear);
         GUIM.UpdateCash(cash, cashGoal);
+        foreach(Planter p in planters)
+        {
+            p.Reset();
+        }
         currentGameState = GameState.Playing;
     }
 

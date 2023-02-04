@@ -31,6 +31,19 @@ public class Planter : MonoBehaviour
         findNeighbors();
     }
 
+    public void Reset()
+    {
+        potatoYield = 0;
+        pS = planterState.empty;
+        transform.Find("Seedlings").gameObject.SetActive(false);
+        transform.Find("PotatoPlant").gameObject.SetActive(false);
+        transform.Find("BlightParticle").GetComponent<ParticleSystem>().Stop();
+        transform.Find("FlameParticle").GetComponent<ParticleSystem>().Stop();
+        hasBlight = false;
+        meshRenderer.material = planterMat;
+        clearPotatoes();
+    }
+
     enum planterState
     {
         empty,
