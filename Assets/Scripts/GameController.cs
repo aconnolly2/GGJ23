@@ -10,6 +10,8 @@ public class GameController : MonoBehaviour
     List<Planter> planters = new List<Planter>();
 
     private int potatoCount = 30;
+    private int cash = 0;
+    private int cashGoal = 500;
 
     private int currentSeason = 3;
     private int currentYear = 0;
@@ -26,6 +28,7 @@ public class GameController : MonoBehaviour
         GUIM = GetComponent<GUIManager>();
         GUIM.UpdatePotatoCount(potatoCount);
         GUIM.UpdateSeason(currentSeason, currentYear);
+        GUIM.UpdateCash(cash, cashGoal);
 
         // Initialize player(s)
         PlayerInput PI = GameObject.Find("Player").GetComponent<PlayerInput>();
@@ -79,6 +82,24 @@ public class GameController : MonoBehaviour
         GUIM.UpdatePotatoCount(potatoCount);
     }
 
+    public void SellPotatoes()
+    {
+        // 5 potatoes for 20 cash
+        if (potatoCount >= 5)
+        {
+            potatoCount -= 5;
+            cash += 20;
+        }
+
+        GUIM.UpdatePotatoCount(potatoCount);
+        GUIM.UpdateCash(cash, cashGoal);
+
+        if (cash >= cashGoal)
+        {
+            // Win condition!
+        }
+    }
+
     public void UpdateTool(string toolName)
     {
         toolName = char.ToUpper(toolName[0]) + toolName.Substring(1);
@@ -104,6 +125,10 @@ public class GameController : MonoBehaviour
     {
         currentSeason = (currentSeason + 1) % totalSeasons;
         if (currentSeason == 0)
+        {
+            currentSeason = 12;
+        }
+        else if (currentSeason == 1)
         {
             currentYear += 1;
         }

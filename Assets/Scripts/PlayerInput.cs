@@ -38,7 +38,7 @@ public class PlayerInput : MonoBehaviour
         Vector3.Normalize(direction);
         direction.y = -9f;
         CC.Move(direction * speed * Time.deltaTime);
-        if (Input.GetButton("Jump"))
+        if (Input.GetButtonDown("Jump"))
         {
             Interact();
         }    
@@ -87,6 +87,10 @@ public class PlayerInput : MonoBehaviour
             else if (hit.transform.tag == "tool")
             {
                 switchTool(hit.transform.name);
+            }
+            else if (hit.transform.tag == "vendor")
+            {
+                gCon.SellPotatoes();
             }
         }
     }

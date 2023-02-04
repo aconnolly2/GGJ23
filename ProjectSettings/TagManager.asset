@@ -6,6 +6,7 @@ TagManager:
   tags:
   - planter
   - tool
+  - vendor
   layers:
   - Default
   - TransparentFX
