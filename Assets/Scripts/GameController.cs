@@ -46,6 +46,10 @@ public class GameController : MonoBehaviour
 
     void eatPotato()
     {
+        if (potatoCount <= 0)
+        {
+            // Game Over!
+        }
         potatoCount -= 1; // * playerCount
         GUIM.UpdatePotatoCount(potatoCount);
     }

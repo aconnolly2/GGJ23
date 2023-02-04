@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerMovement : MonoBehaviour
+public class PlayerInput : MonoBehaviour
 {
     private float speed = 5f;
     private Vector3 direction = new Vector3();
@@ -21,5 +21,14 @@ public class PlayerMovement : MonoBehaviour
         Vector3.Normalize(direction);
         direction.y = -9f;
         CC.Move(direction * speed * Time.deltaTime);
+        if (Input.GetButton("Jump"))
+        {
+            Interact();
+        }    
+    }
+
+    void Interact()
+    {
+        Debug.Log("Interaction attempted");
     }
 }
