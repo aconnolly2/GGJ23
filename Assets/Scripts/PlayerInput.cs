@@ -15,6 +15,7 @@ public class PlayerInput : MonoBehaviour
 
     tools currentTool = tools.planter;
     private float speed = 5f;
+    private float rotSpeed = 15f;
     private Vector3 direction = new Vector3();
     private CharacterController CC;
 
@@ -38,6 +39,12 @@ public class PlayerInput : MonoBehaviour
             direction.x = Input.GetAxis("Horizontal");
             direction.z = Input.GetAxis("Vertical");
             Vector3.Normalize(direction);
+            if (Input.GetAxisRaw("Horizontal") != 0 || Input.GetAxisRaw("Vertical") != 0)
+            {
+                Quaternion targetRot = Quaternion.Euler(new Vector3(0, Mathf.Atan2(direction.z, -direction.x) * Mathf.Rad2Deg - 90, 0));
+                transform.rotation = Quaternion.Lerp(transform.rotation, targetRot, rotSpeed * Time.deltaTime);
+            }
+
             direction.y = -9f;
             CC.Move(direction * speed * Time.deltaTime);
         }

@@ -40,6 +40,7 @@ public class Planter : MonoBehaviour
         transform.Find("BlightParticle").GetComponent<ParticleSystem>().Stop();
         transform.Find("FlameParticle").GetComponent<ParticleSystem>().Stop();
         hasBlight = false;
+        blightSeason = -1;
         meshRenderer.material = planterMat;
         clearPotatoes();
     }
@@ -52,6 +53,7 @@ public class Planter : MonoBehaviour
     };
 
     bool hasBlight = false;
+    int blightSeason = -1;
     planterState pS = planterState.empty;
 
     public void PlantPotato()
@@ -85,6 +87,7 @@ public class Planter : MonoBehaviour
         pS = planterState.empty;
         potatoYield = 0;
         hasBlight = false;
+        blightSeason = -1;
         transform.Find("Seedlings").gameObject.SetActive(false);
         transform.Find("PotatoPlant").gameObject.SetActive(false);
         meshRenderer.material = planterMat;
@@ -104,7 +107,9 @@ public class Planter : MonoBehaviour
             int blightedNeighbors = 0;
             foreach (Planter neighbor in neighborPlots)
             {
-                if (neighbor.BlightCheck() && neighbor.isPlanted())
+                if (neighbor.BlightCheck() != -1 && 
+                    neighbor.BlightCheck() != gCon.GetYear() * 12 + gCon.GetSeason() && 
+                    neighbor.isPlanted())
                 {
                     blightedNeighbors += 1;
                 }
@@ -147,9 +152,9 @@ public class Planter : MonoBehaviour
         }
     }    
 
-    public bool BlightCheck()
+    public int BlightCheck()
     {
-        return hasBlight;
+        return blightSeason;
     }
 
     public bool isPlanted()
@@ -164,6 +169,7 @@ public class Planter : MonoBehaviour
     void blighted()
     {
         hasBlight = true;
+        blightSeason = gCon.GetYear() * 12 + gCon.GetSeason();
         meshRenderer.material = blightMat;
         transform.Find("BlightParticle").GetComponent<ParticleSystem>().Play();
     }
