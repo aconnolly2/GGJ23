@@ -26,7 +26,7 @@ public class GameController : MonoBehaviour
 
     const int TOTAL_SEASONS = 12;
     // 10 seconds to advance a season.
-    private float seasonSpeed = 10f;
+    private float seasonSpeed = 3f;
     private float seasonTimer = 0;
     private int currentSeason = 3;
     private int currentYear = 0;
@@ -44,9 +44,10 @@ public class GameController : MonoBehaviour
     void Start()
     {
         GUIM = GetComponent<GUIManager>();
-        GUIM.UpdatePotatoCount(potatoQ.Count);
+        GUIM.UpdatePotatoCount(potatoQ, currentYear, currentSeason, potatoLifespan);
         GUIM.UpdateYear(currentYear);
         GUIM.UpdateCash(cash, cashGoal);
+        GUIM.UpdateCurrentTool("Planter");
 
         // Initialize player(s)
         PlayerInput PI = GameObject.Find("Player").GetComponent<PlayerInput>();
@@ -83,7 +84,7 @@ public class GameController : MonoBehaviour
     public void CollectPotatoes(int count)
     {
         AddPotatoes(count);
-        GUIM.UpdatePotatoCount(potatoQ.Count);
+        GUIM.UpdatePotatoCount(potatoQ, currentYear, currentSeason, potatoLifespan);
     }
 
     public void SellPotatoes()
@@ -95,7 +96,7 @@ public class GameController : MonoBehaviour
             cash += 20;
         }
 
-        GUIM.UpdatePotatoCount(potatoQ.Count);
+        GUIM.UpdatePotatoCount(potatoQ, currentYear, currentSeason, potatoLifespan);
         GUIM.UpdateCash(cash, cashGoal);
 
         if (cash >= cashGoal)
@@ -114,7 +115,7 @@ public class GameController : MonoBehaviour
         if (potatoQ.Count > 0 && currentSeason >= 3 && currentSeason <= 5)
         {
             RemovePotatoes(1);
-            GUIM.UpdatePotatoCount(potatoQ.Count);
+            GUIM.UpdatePotatoCount(potatoQ, currentYear, currentSeason, potatoLifespan);
             return true;
         }
         return false;
@@ -126,7 +127,7 @@ public class GameController : MonoBehaviour
         currentYear = 0;
         AddPotatoes(30);
         GUIM.ClearEndText();
-        GUIM.UpdatePotatoCount(potatoQ.Count);
+        GUIM.UpdatePotatoCount(potatoQ, currentYear, currentSeason, potatoLifespan);
         GUIM.UpdateCursorSprite(currentSeason, seasonTimer, seasonSpeed);
         GUIM.UpdateYear(currentYear);
         GUIM.UpdateCash(cash, cashGoal);
@@ -173,7 +174,7 @@ public class GameController : MonoBehaviour
             return;
         }
         RemovePotatoes(1); // * playerCount
-        GUIM.UpdatePotatoCount(potatoQ.Count);
+        GUIM.UpdatePotatoCount(potatoQ, currentYear, currentSeason, potatoLifespan);
     }
 
     void updateSeason()
@@ -210,6 +211,6 @@ public class GameController : MonoBehaviour
         {
             potatoQ.Dequeue();
         }
-        GUIM.UpdatePotatoCount(potatoQ.Count);
+        GUIM.UpdatePotatoCount(potatoQ, currentYear, currentSeason, potatoLifespan);
     }
 }
