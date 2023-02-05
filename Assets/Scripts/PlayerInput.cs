@@ -14,6 +14,11 @@ public class PlayerInput : MonoBehaviour
     };
 
     tools currentTool = tools.planter;
+
+    GameObject planterMesh;
+    GameObject harvesterMesh;
+    GameObject flamethrowerMesh;
+
     private float speed = 5f;
     private float rotSpeed = 15f;
     private Vector3 direction = new Vector3();
@@ -29,6 +34,10 @@ public class PlayerInput : MonoBehaviour
     void Start()
     {
         CC = GetComponent<CharacterController>();
+        planterMesh = transform.Find("Spade").gameObject;
+        harvesterMesh = transform.Find("Hoe").gameObject;
+        flamethrowerMesh = transform.Find("Flamethrower").gameObject;
+        switchTool("planter");
     }
 
     // Update is called once per frame
@@ -56,15 +65,19 @@ public class PlayerInput : MonoBehaviour
 
     void switchTool(string toolName)
     {
+        hideMeshes();
         switch(toolName)
         {
             case "planter":
+                planterMesh.SetActive(true);
                 currentTool = tools.planter;
                 break;
             case "harvester":
+                harvesterMesh.SetActive(true);
                 currentTool = tools.harvester;
                 break;
             case "flamethrower":
+                flamethrowerMesh.SetActive(true);
                 currentTool = tools.flamethrower;
                 break;
             default:
@@ -72,6 +85,13 @@ public class PlayerInput : MonoBehaviour
                 break;
         }
         gCon.UpdateTool(currentTool.ToString());
+    }
+
+    void hideMeshes()
+    {
+        planterMesh.SetActive(false);
+        harvesterMesh.SetActive(false);
+        flamethrowerMesh.SetActive(false);
     }
 
     void Interact()
