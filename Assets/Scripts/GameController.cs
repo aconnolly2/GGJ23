@@ -22,6 +22,7 @@ public class GameController : MonoBehaviour
 
     public GameObject Player1;
     public GameObject Player2;
+    public Transform PlayerSpawn;
     private bool multiplayer = false;
     private bool arcadeMode = false;
 
@@ -138,7 +139,9 @@ public class GameController : MonoBehaviour
         }
         cash = 0;
         currentSeason = 3;
+        seasonTimer = 0;
         currentYear = 0;
+        Player1.transform.position = PlayerSpawn.position;
         potatoQ.Clear();
         AddPotatoes(30);
         GUIM.ClearEndText();
