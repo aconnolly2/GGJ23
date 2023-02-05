@@ -13,6 +13,8 @@ public class PlayerInput : MonoBehaviour
         none
     };
 
+    int playerIndex;
+
     tools currentTool = tools.planter;
 
     GameObject planterMesh;
@@ -38,6 +40,9 @@ public class PlayerInput : MonoBehaviour
         harvesterMesh = transform.Find("Hoe").gameObject;
         flamethrowerMesh = transform.Find("Flamethrower").gameObject;
         switchTool("planter");
+
+        int.TryParse(gameObject.name[gameObject.name.Length - 1].ToString(), out playerIndex);
+        Debug.Log(playerIndex);
     }
 
     // Update is called once per frame
@@ -45,13 +50,35 @@ public class PlayerInput : MonoBehaviour
     {
         if (gCon.GetCurrentGameState() == GameState.Playing)
         {
-            direction.x = Input.GetAxis("Horizontal");
-            direction.z = Input.GetAxis("Vertical");
-            Vector3.Normalize(direction);
-            if (Input.GetAxisRaw("Horizontal") != 0 || Input.GetAxisRaw("Vertical") != 0)
+            if (playerIndex == 1)
             {
-                Quaternion targetRot = Quaternion.Euler(new Vector3(0, Mathf.Atan2(direction.z, -direction.x) * Mathf.Rad2Deg - 90, 0));
-                transform.rotation = Quaternion.Lerp(transform.rotation, targetRot, rotSpeed * Time.deltaTime);
+                direction.x = Input.GetAxis("HorizontalP1");
+                direction.z = Input.GetAxis("VerticalP1");
+                Vector3.Normalize(direction);
+                if (Input.GetAxisRaw("HorizontalP1") != 0 || Input.GetAxisRaw("VerticalP1") != 0)
+                {
+                    Quaternion targetRot = Quaternion.Euler(new Vector3(0, Mathf.Atan2(direction.z, -direction.x) * Mathf.Rad2Deg - 90, 0));
+                    transform.rotation = Quaternion.Lerp(transform.rotation, targetRot, rotSpeed * Time.deltaTime);
+                }
+                if (Input.GetButtonDown("Fire1"))
+                {
+                    Interact();
+                }
+            }
+            else if (playerIndex == 2)
+            {
+                direction.x = Input.GetAxis("HorizontalP2");
+                direction.z = Input.GetAxis("VerticalP2");
+                Vector3.Normalize(direction);
+                if (Input.GetAxisRaw("HorizontalP2") != 0 || Input.GetAxisRaw("VerticalP2") != 0)
+                {
+                    Quaternion targetRot = Quaternion.Euler(new Vector3(0, Mathf.Atan2(direction.z, -direction.x) * Mathf.Rad2Deg - 90, 0));
+                    transform.rotation = Quaternion.Lerp(transform.rotation, targetRot, rotSpeed * Time.deltaTime);
+                }
+                if (Input.GetButtonDown("Fire2"))
+                {
+                    Interact();
+                }
             }
 
             direction.y = -9f;
@@ -59,8 +86,8 @@ public class PlayerInput : MonoBehaviour
         }
         if (Input.GetButtonDown("Jump"))
         {
-            Interact();
-        }    
+            MenuInteract();
+        }
     }
 
     void switchTool(string toolName)
@@ -92,6 +119,19 @@ public class PlayerInput : MonoBehaviour
         planterMesh.SetActive(false);
         harvesterMesh.SetActive(false);
         flamethrowerMesh.SetActive(false);
+    }
+
+    void MenuInteract()
+    {
+        if (gCon.GetCurrentGameState() == GameState.Menu)
+        {
+            gCon.RestartGame();
+            gCon.StartGame();
+        }
+        else if (gCon.GetCurrentGameState() != GameState.Playing)
+        {
+            gCon.ReturnToMenu();
+        }
     }
 
     void Interact()
@@ -126,10 +166,6 @@ public class PlayerInput : MonoBehaviour
                 }
 
             }
-        }
-        else
-        {
-            gCon.RestartGame();
         }
     }
 }

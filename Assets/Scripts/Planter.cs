@@ -94,8 +94,13 @@ public class Planter : MonoBehaviour
         clearPotatoes();
     }
 
-    public void UpdateSeason(int newSeason)
+    public void UpdateSeason(int newSeason, bool multiplayer)
     {
+        int multiplayerFactor = 1;
+        if (multiplayer)
+        {
+            multiplayerFactor = 2;
+        }
 
         // Blight Check
         if (pS != planterState.empty)
@@ -126,7 +131,7 @@ public class Planter : MonoBehaviour
             }
 
             // Base blight risk = 0.5% * year + 1
-            blightRisk = 0.005f * (gCon.GetYear() + 1);
+            blightRisk = 0.005f * multiplayerFactor * (gCon.GetYear() + 1);
             blightThresh = Random.Range(0f, 1f);
 
             if (blightThresh <= blightRisk)
@@ -147,7 +152,7 @@ public class Planter : MonoBehaviour
         {
             if (newSeason >= 6 && newSeason <= 10 && !hasBlight)
             {
-                growPotatoes();
+                growPotatoes(multiplayer);
             }
         }
     }    
@@ -206,22 +211,40 @@ public class Planter : MonoBehaviour
         transform.Find("PotatoPlant").gameObject.SetActive(true);
     }
 
-    void growPotatoes()
+    void growPotatoes(bool multiplayer)
     {
         // 50% chance to grow 1 potato/season
         // 10% chance to grow 2 potatoes/season
         // Max 8 potatoes/season possible. Very unlikely.
         int potatoIndex = Random.Range(1, 101);
-        if (potatoIndex > 90)
+        if (multiplayer)
         {
-            potatoYield += 2;
-            activatePotato();
-            activatePotato();
+            if (potatoIndex > 75)
+            {
+                potatoYield += 2;
+                activatePotato();
+                activatePotato();
+            }
+            else if (potatoIndex > 25)
+            {
+                potatoYield += 1;
+                activatePotato();
+            }
+
         }
-        else if (potatoIndex > 35)
+        else
         {
-            potatoYield += 1;
-            activatePotato();
+            if (potatoIndex > 90)
+            {
+                potatoYield += 2;
+                activatePotato();
+                activatePotato();
+            }
+            else if (potatoIndex > 35)
+            {
+                potatoYield += 1;
+                activatePotato();
+            }
         }
     }
 

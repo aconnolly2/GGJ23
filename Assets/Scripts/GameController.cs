@@ -20,13 +20,18 @@ public class GameController : MonoBehaviour
     List<Planter> planters = new List<Planter>();
     private Queue<Potato> potatoQ = new Queue<Potato>();
 
+    public GameObject Player1;
+    public GameObject Player2;
+    private bool multiplayer = false;
+    private bool arcadeMode = false;
+
     private int potatoLifespan = 9;
     private int cash = 0;
     private int cashGoal = 300;
 
     const int TOTAL_SEASONS = 12;
     // 10 seconds to advance a season.
-    private float seasonSpeed = 3f;
+    private float seasonSpeed = 10f;
     private float seasonTimer = 0;
     private int currentSeason = 3;
     private int currentYear = 0;
@@ -46,13 +51,14 @@ public class GameController : MonoBehaviour
         GUIM = GetComponent<GUIManager>();
         GUIM.UpdatePotatoCount(potatoQ, currentYear, currentSeason, potatoLifespan);
         GUIM.UpdateYear(currentYear);
-        GUIM.UpdateCash(cash, cashGoal);
+        GUIM.UpdateCash(cash, cashGoal, arcadeMode);
         GUIM.UpdateCurrentTool("Planter");
 
         // Initialize player(s)
-        PlayerInput PI = GameObject.Find("Player").GetComponent<PlayerInput>();
-        PI.Init(this);
-           
+        Player1.GetComponent<PlayerInput>().Init(this);
+        Player2.GetComponent<PlayerInput>().Init(this);
+
+
 
         // Populate Planter List
         PlanterParent = GameObject.Find("Planters");
@@ -97,7 +103,7 @@ public class GameController : MonoBehaviour
         }
 
         GUIM.UpdatePotatoCount(potatoQ, currentYear, currentSeason, potatoLifespan);
-        GUIM.UpdateCash(cash, cashGoal);
+        GUIM.UpdateCash(cash, cashGoal, arcadeMode);
 
         if (cash >= cashGoal)
         {
@@ -122,32 +128,92 @@ public class GameController : MonoBehaviour
     }
     public void RestartGame()
     {
+        if (multiplayer)
+        {
+            cashGoal = 600;
+        }
+        else
+        {
+            cashGoal = 300;
+        }
         cash = 0;
         currentSeason = 3;
         currentYear = 0;
+        potatoQ.Clear();
         AddPotatoes(30);
         GUIM.ClearEndText();
         GUIM.UpdatePotatoCount(potatoQ, currentYear, currentSeason, potatoLifespan);
         GUIM.UpdateCursorSprite(currentSeason, seasonTimer, seasonSpeed);
         GUIM.UpdateYear(currentYear);
-        GUIM.UpdateCash(cash, cashGoal);
+        GUIM.UpdateCash(cash, cashGoal, arcadeMode);
         foreach (Planter p in planters)
         {
             p.Reset();
         }
+    }
+    
+    public void StartGame()
+    {
         currentGameState = GameState.Playing;
+    }
+
+    public void ReturnToMenu()
+    {
+        currentGameState = GameState.Menu;
+        GUIM.ShowMenu();
     }
 
     void Win()
     {
+        if (arcadeMode)
+            return;
+
         currentGameState = GameState.Win;
         GUIM.ShowWin();
+
+        // Check high score
+        int bestSeason = PlayerPrefs.GetInt("StorySeason", -1);
+        int bestYear = PlayerPrefs.GetInt("StoryYear", -1);
+
+        if (bestSeason == -1)
+        {
+            PlayerPrefs.SetInt("StorySeason", currentSeason);
+            PlayerPrefs.SetInt("StoryYear", currentYear);
+        }
+        else if (bestYear * 12 + bestSeason > currentYear * 12 + currentSeason)
+        {
+            PlayerPrefs.SetInt("StorySeason", currentSeason);
+            PlayerPrefs.SetInt("StoryYear", currentYear);
+        }
     }
 
     void Lose()
     {
         currentGameState = GameState.Lose;
         GUIM.ShowLose();
+
+        if (arcadeMode)
+        {
+            // Check high scores
+            int bestSeason = PlayerPrefs.GetInt("ArcadeSeason", 0);
+            int bestYear = PlayerPrefs.GetInt("ArcadeYear", 0);
+            int bestMoney = PlayerPrefs.GetInt("ArcadeMoney", 0);
+
+            if (bestYear * 12 + bestSeason < currentYear * 12 + currentSeason)
+            {
+                PlayerPrefs.SetInt("ArcadeSeason", currentSeason);
+                PlayerPrefs.SetInt("ArcadeYear", currentYear);
+            }
+            if(bestMoney < cash)
+            {
+                PlayerPrefs.SetInt("ArcadeMoney", cash);
+            }
+        }
+    }
+
+    public void UpdateHighScores()
+    {
+        GUIM.UpdateHighScores();
     }
 
     void AddPotatoes(int count)
@@ -168,12 +234,18 @@ public class GameController : MonoBehaviour
 
     void eatPotato()
     {
-        if (potatoQ.Count <= 0)
+        int potatoFeast = 1;
+        if (multiplayer)
+        {
+            potatoFeast = 2;
+        }
+
+        if (potatoQ.Count < potatoFeast)
         {
             Lose();
             return;
         }
-        RemovePotatoes(1); // * playerCount
+        RemovePotatoes(potatoFeast); // * playerCount
         GUIM.UpdatePotatoCount(potatoQ, currentYear, currentSeason, potatoLifespan);
     }
 
@@ -201,7 +273,7 @@ public class GameController : MonoBehaviour
         }
         foreach(Planter p in planters)
         {
-            p.UpdateSeason(currentSeason);
+            p.UpdateSeason(currentSeason, multiplayer);
         }
         eatPotato();
 
@@ -212,5 +284,22 @@ public class GameController : MonoBehaviour
             potatoQ.Dequeue();
         }
         GUIM.UpdatePotatoCount(potatoQ, currentYear, currentSeason, potatoLifespan);
+    }
+
+    public void SinglePlayer()
+    {
+        multiplayer = false;
+    }
+    public void Multiplayer()
+    {
+        multiplayer = true;
+    }
+    public void StoryMode()
+    {
+        arcadeMode = false;
+    }
+    public void ArcadeMode()
+    {
+        arcadeMode = true;
     }
 }

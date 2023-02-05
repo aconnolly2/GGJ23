@@ -19,7 +19,10 @@ public class GUIManager : MonoBehaviour
     public TextMeshProUGUI WinText;
     public TextMeshProUGUI LoseText;
     public TextMeshProUGUI StartGame;
+    public TextMeshProUGUI TitleText;
+    public TextMeshProUGUI HighScoresText;
 
+    public GameObject MenuPanel;
     public GameObject SeasonCursor;
 
     public GameObject PotatoSprite;
@@ -89,9 +92,16 @@ public class GUIManager : MonoBehaviour
 
     }
 
-    public void UpdateCash(int cash, int cashGoal)
+    public void UpdateCash(int cash, int cashGoal, bool arcadeMode)
     {
-        CashCounter.text = "$" + cash.ToString() + " / $" + cashGoal.ToString();
+        if (arcadeMode)
+        {
+            CashCounter.text = "$" + cash.ToString();
+        }
+        else
+        {
+            CashCounter.text = "$" + cash.ToString() + " / $" + cashGoal.ToString();
+        }
     }
 
     public void ShowWin()
@@ -106,10 +116,54 @@ public class GUIManager : MonoBehaviour
         StartGame.gameObject.SetActive(true);
     }
 
+    public void ShowMenu()
+    {
+        StartGame.gameObject.SetActive(true);
+        //TitleText.gameObject.SetActive(true);
+        MenuPanel.gameObject.SetActive(true);
+        WinText.gameObject.SetActive(false);
+        LoseText.gameObject.SetActive(false);
+    }
+
     public void ClearEndText()
     {
         WinText.gameObject.SetActive(false);
         LoseText.gameObject.SetActive(false);
         StartGame.gameObject.SetActive(false);
+        MenuPanel.SetActive(false);
+        //TitleText.gameObject.SetActive(false);
+    }
+
+    public void UpdateHighScores()
+    {
+
+        int bestArcadeSeason = PlayerPrefs.GetInt("ArcadeSeason", 0);
+        int bestArcadeYear = PlayerPrefs.GetInt("ArcadeYear", 0);
+        int bestArcadeMoney = PlayerPrefs.GetInt("ArcadeMoney", 0);
+
+        int bestStorySeason = PlayerPrefs.GetInt("StorySeason", -1);
+        int bestStoryYear = PlayerPrefs.GetInt("StoryYear", -1);
+        string highScoreText = "";
+        if (bestStorySeason == -1)
+        {
+             highScoreText = "Fastest Story Completion:\n" +
+                "None" +
+                "\nArcade Longest Survival:\n" +
+                "Year: " + bestArcadeYear.ToString() + " Season: " + bestArcadeSeason.ToString() +
+                "\nArcade Highest Earnings:\n" +
+                "Cash: " + bestArcadeMoney.ToString();
+        }
+        else
+        {
+            highScoreText = "Fastest Story Completion:\n" +
+                "Year: " + bestStoryYear.ToString() + " Season: " + bestStorySeason.ToString() +
+                "\nArcade Longest Survival:\n" +
+                "Year: " + bestArcadeYear.ToString() + " Season: " + bestArcadeSeason.ToString() +
+                "\nArcade Highest Earnings:\n" +
+                "Cash: " + bestArcadeMoney.ToString();
+        }
+
+        HighScoresText.text = highScoreText;
+
     }
 }
